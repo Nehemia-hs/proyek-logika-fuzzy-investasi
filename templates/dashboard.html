@@ -1,0 +1,1122 @@
+<!-- =========================
+FILE : dashboard.html
+Single-page layout — semua section scroll
+========================= -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InvestRank — Fuzzy AHP</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/style.css') }}">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="logo">
+        <i class="fa-solid fa-chart-line"></i>
+        <span>InvestRank</span>
+    </div>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Toggle menu">
+        <i class="fa-solid fa-bars" id="hamburgerIcon"></i>
+    </button>
+    <ul class="nav-links" id="navLinks">
+        <li><a href="#sec-dashboard"  class="nav-scroll active">Dashboard</a></li>
+        <li><a href="#sec-saham"      class="nav-scroll">Data Saham</a></li>
+        <li><a href="#sec-kriteria"   class="nav-scroll">Kriteria</a></li>
+        <li><a href="#sec-metodologi" class="nav-scroll">Metodologi</a></li>
+        <li><a href="#sec-ahp"        class="nav-scroll">Fuzzy AHP</a></li>
+        <li><a href="#sec-hasil"      class="nav-scroll">Hasil</a></li>
+    </ul>
+</nav>
+
+<!-- ======================================================
+     SECTION 1 : DASHBOARD
+====================================================== -->
+<section class="container" id="sec-dashboard">
+
+    <div class="hero">
+        <div class="hero-text">
+            <div class="hero-eyebrow">
+                <span></span>
+                Sistem Pendukung Keputusan &middot; Fuzzy AHP
+            </div>
+            <h1>Investasi <span>Lebih Cerdas</span><br>Dengan InvestRank</h1>
+            <p>
+                Sistem rekomendasi saham sektor <strong>Consumer Goods</strong>
+                menggunakan metode <strong>Fuzzy Analytical Hierarchy Process (Fuzzy-AHP)</strong>
+                untuk menghasilkan keputusan yang lebih akurat dengan memperhitungkan
+                <strong>ketidakpastian penilaian manusia</strong>.
+            </p>
+            <div class="hero-cta">
+                <a href="#sec-ahp" class="hero-btn nav-scroll">
+                    <i class="fa-solid fa-rocket"></i> Mulai Analisis
+                </a>
+                <a href="#sec-saham" class="btn-ghost nav-scroll">
+                    <i class="fa-solid fa-table"></i> Lihat Data
+                </a>
+            </div>
+        </div>
+
+        <div class="hero-panel">
+            {% if ranking %}
+            <div class="hero-kpi">
+                <div class="hero-kpi-icon green"><i class="fa-solid fa-trophy"></i></div>
+                <div>
+                    <div class="hero-kpi-label">Saham Terbaik</div>
+                    <div class="hero-kpi-val">{{ ranking[0].kode }}</div>
+                    <div class="hero-kpi-sub up">&#9650; Skor {{ "%.4f"|format(ranking[0].skor) }}</div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if ahp %}
+            <div class="hero-kpi">
+                <div class="hero-kpi-icon purple"><i class="fa-solid fa-circle-nodes"></i></div>
+                <div>
+                    <div class="hero-kpi-label">Metode &amp; CR</div>
+                    <div class="hero-kpi-val">CR = {{ "%.3f"|format(ahp.cr) }}</div>
+                    <div class="hero-kpi-sub fuzzy">
+                        Fuzzy-AHP &nbsp;{{ '✓ Konsisten' if ahp.consistent else '✗ Tidak Konsisten' }}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="hero-kpi">
+                <div class="hero-kpi-icon yellow"><i class="fa-solid fa-layer-group"></i></div>
+                <div>
+                    <div class="hero-kpi-label">Total Emiten</div>
+                    <div class="hero-kpi-val">{{ stocks|length }} Saham</div>
+                    <div class="hero-kpi-sub ok">Consumer Goods IDX</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="beginner-guide" aria-label="Panduan singkat penggunaan">
+        <div class="beginner-guide-head">
+            <span class="beginner-guide-icon"><i class="fa-solid fa-route"></i></span>
+            <div>
+                <h2>Cara Menggunakan</h2>
+                <p>Ikuti alur sederhana ini jika baru pertama kali memakai InvestRank.</p>
+            </div>
+        </div>
+        <div class="beginner-steps">
+            <a href="#sec-saham" class="beginner-step nav-scroll">
+                <strong>1</strong>
+                <span>Lihat data saham</span>
+            </a>
+            <a href="#sec-kriteria" class="beginner-step nav-scroll">
+                <strong>2</strong>
+                <span>Pahami kriteria</span>
+            </a>
+            <a href="#sec-ahp" class="beginner-step nav-scroll">
+                <strong>3</strong>
+                <span>Isi perbandingan</span>
+            </a>
+            <a href="#sec-hasil" class="beginner-step nav-scroll">
+                <strong>4</strong>
+                <span>Baca hasil ranking</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="stats">
+        <div class="stat-card">
+            <span class="stat-icon"><i class="fa-solid fa-briefcase"></i></span>
+            <h2>{{ stocks|length }}</h2>
+            <p>Saham Consumer Goods</p>
+        </div>
+        <div class="stat-card">
+            <span class="stat-icon"><i class="fa-solid fa-list-check"></i></span>
+            <h2>4</h2>
+            <p>Kriteria Penilaian</p>
+        </div>
+        <div class="stat-card">
+            <span class="stat-icon fuzzy"><i class="fa-solid fa-circle-nodes"></i></span>
+            <h2 class="fuzzy">Fuzzy</h2>
+            <p>AHP + TFN Aktif</p>
+        </div>
+    </div>
+
+    <div class="chart-card">
+        <div class="chart-header">
+            <div>
+                <h2 class="section-title" style="margin:0 0 6px">Tren Harga Saham</h2>
+                <p class="chart-subtitle">Pergerakan harga 5 saham Consumer Goods IDX 30 hari terakhir.</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                {% if cache_info and cache_info.is_realtime %}
+                    <span class="chart-badge" style="background:#dcfce7;color:#166534">
+                        <i class="fa-solid fa-circle" style="font-size:7px;margin-right:4px;color:#22c55e"></i>
+                        Real-time
+                    </span>
+                    {% if cache_info.last_updated %}
+                    <span style="font-size:12px;color:#64748b">
+                        Diperbarui: <strong>{{ cache_info.last_updated }}</strong>
+                    </span>
+                    {% endif %}
+                {% else %}
+                    <span class="chart-badge" style="background:#fef9c3;color:#854d0e">
+                        <i class="fa-solid fa-clock" style="font-size:10px;margin-right:4px"></i>
+                        Data Fallback
+                    </span>
+                {% endif %}
+                <button onclick="refreshData()" class="chart-badge"
+                    style="cursor:pointer;border:none;background:#e0e7ff;color:#3730a3;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600">
+                    <i class="fa-solid fa-rotate-right" id="refreshIcon"></i> Refresh
+                </button>
+            </div>
+        </div>
+        <div class="legend-row" id="chartLegend"></div>
+        <div class="chart-canvas-wrapper chart-lg">
+            <canvas id="stockChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+    function refreshData() {
+        var icon = document.getElementById('refreshIcon');
+        if (icon) icon.classList.add('fa-spin');
+        fetch('/api/refresh-cache')
+            .then(function(r) { return r.json(); })
+            .then(function() { window.location.reload(); })
+            .catch(function() { window.location.reload(); });
+    }
+    </script>
+
+    <script>
+        const dashboardStocks = {{ (stocks | tojson) if stocks else "[]" }};
+    </script>
+
+    <div class="stats" style="margin-top:0">
+        <div class="stat-card">
+            <span class="stat-icon"><i class="fa-solid fa-arrow-trend-up"></i></span>
+            <h2>Return</h2>
+            <p>Tingkat keuntungan saham.</p>
+        </div>
+        <div class="stat-card">
+            <span class="stat-icon"><i class="fa-solid fa-shield-halved"></i></span>
+            <h2>Risiko</h2>
+            <p>Volatilitas harga saham.</p>
+        </div>
+        <div class="stat-card">
+            <span class="stat-icon teal"><i class="fa-solid fa-money-bill-trend-up"></i></span>
+            <h2>Dividen</h2>
+            <p>Keuntungan pembagian dividen.</p>
+        </div>
+    </div>
+
+</section>
+
+<hr class="section-divider">
+
+<!-- ======================================================
+     SECTION 2 : DATA SAHAM
+====================================================== -->
+<section class="container" id="sec-saham">
+
+    <div class="sec-label"><i class="fa-solid fa-database" style="font-size:11px"></i> Data Saham</div>
+    <h1 class="page-title">Data Saham Consumer Goods</h1>
+    <p class="subtitle">Menampilkan data saham berdasarkan return bulanan, dividend yield, dan kestabilan saham.</p>
+
+    <div class="stats">
+        <div class="stat-card">
+            <span class="stat-icon"><i class="fa-solid fa-database"></i></span>
+            <h2>{{ total_record }}</h2>
+            <p>Total Record</p>
+        </div>
+        <div class="stat-card">
+            <span class="stat-icon"><i class="fa-solid fa-layer-group"></i></span>
+            <h2>{{ stocks|length }}</h2>
+            <p>Total Saham</p>
+        </div>
+        <div class="stat-card">
+            <span class="stat-icon"><i class="fa-solid fa-industry"></i></span>
+            <h2>Consumer</h2>
+            <p>Sektor Saham</p>
+        </div>
+    </div>
+
+    <div class="top-action">
+        <div class="left-action">
+            <div class="search-box">
+                <i class="fa-solid fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Cari saham...">
+            </div>
+            <select class="filter-select" id="filterSelect">
+                <option value="">Semua Saham</option>
+                {% for s in stocks %}
+                <option value="{{ s.kode }}">{{ s.kode }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table id="stockTable">
+            <thead>
+                <tr>
+                    <th>Saham</th><th>Perusahaan</th><th>Harga</th>
+                    <th>Return (%)</th><th>Dividend Yield</th>
+                    <th title="Skor volatilitas ternormalisasi (0=rendah, 100=tinggi)">Risiko</th>
+                    <th title="Skor stabilitas ternormalisasi (0=rendah, 100=tinggi)">Stabilitas</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in stocks %}
+                <tr>
+                    <td><strong>{{ s.kode }}</strong></td>
+                    <td style="font-size:13px;color:#64748b">{{ s.keterangan }}</td>
+                    <td>Rp {{ "{:,.0f}".format(s.harga).replace(",", ".") }}</td>
+                    <td class="{{ 'positive' if s.return_pct >= 0 else 'negative' }}">
+                        {{ "%+.2f"|format(s.return_pct) }}%
+                    </td>
+                    <td>{{ s.dividend }}</td>
+                    <td>
+                        <div class="mini-bar-wrap">
+                            <div class="mini-bar risk" data-w="{{ s.risiko_val }}"></div>
+                            <span>{{ s.risiko_val }}%</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="mini-bar-wrap">
+                            <div class="mini-bar stab" data-w="{{ s.stabilitas_val }}"></div>
+                            <span>{{ s.stabilitas_val }}%</span>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</section>
+
+<hr class="section-divider">
+
+<!-- ======================================================
+     SECTION 3 : KRITERIA
+====================================================== -->
+<section class="container" id="sec-kriteria">
+
+    <div class="sec-label"><i class="fa-solid fa-list-check" style="font-size:11px"></i> Kriteria</div>
+    <h1 class="page-title">Kriteria Penilaian Saham</h1>
+    <p class="subtitle">Sistem menggunakan 4 kriteria utama untuk menentukan saham terbaik menggunakan Fuzzy-AHP.</p>
+
+    <div class="criteria-grid">
+        <div class="criteria-card">
+            <div class="criteria-icon blue"><i class="fa-solid fa-arrow-trend-up"></i></div>
+            <h3>Return</h3>
+            <span class="criteria-type benefit">Benefit Criteria</span>
+            <p>Mengukur tingkat keuntungan investor dari kenaikan harga saham. Semakin tinggi return, semakin baik.</p>
+        </div>
+        <div class="criteria-card">
+            <div class="criteria-icon red"><i class="fa-solid fa-chart-line"></i></div>
+            <h3>Risiko</h3>
+            <span class="criteria-type cost">Cost Criteria</span>
+            <p>Mengukur tingkat volatilitas atau ketidakstabilan harga saham. Semakin kecil risiko, semakin baik.</p>
+        </div>
+        <div class="criteria-card">
+            <div class="criteria-icon green"><i class="fa-solid fa-money-bill-trend-up"></i></div>
+            <h3>Dividend Yield</h3>
+            <span class="criteria-type benefit">Benefit Criteria</span>
+            <p>Mengukur keuntungan tambahan dari pembagian dividen perusahaan. Nilai lebih tinggi lebih baik.</p>
+        </div>
+        <div class="criteria-card">
+            <div class="criteria-icon purple"><i class="fa-solid fa-shield-heart"></i></div>
+            <h3>Stabilitas</h3>
+            <span class="criteria-type benefit">Benefit Criteria</span>
+            <p>Mengukur kestabilan pergerakan saham dari waktu ke waktu. Lebih stabil lebih disukai investor konservatif.</p>
+        </div>
+    </div>
+
+    <div class="glossary-grid">
+        <div class="glossary-card">
+            <span>Benefit Criteria</span>
+            <p>Nilai yang lebih tinggi dianggap lebih baik, misalnya return dan dividen.</p>
+        </div>
+        <div class="glossary-card">
+            <span>Cost Criteria</span>
+            <p>Nilai yang lebih rendah dianggap lebih baik, misalnya risiko saham.</p>
+        </div>
+        <div class="glossary-card">
+            <span>CR</span>
+            <p>Ukuran konsistensi jawaban. Hasil dianggap baik jika CR kurang dari 0.10.</p>
+        </div>
+        <div class="glossary-card">
+            <span>TFN &amp; BNP</span>
+            <p>TFN menangkap ketidakpastian penilaian, lalu BNP mengubahnya menjadi bobot angka.</p>
+        </div>
+    </div>
+
+</section>
+
+<hr class="section-divider">
+
+<!-- ======================================================
+     SECTION 4 : METODOLOGI
+====================================================== -->
+<section class="container" id="sec-metodologi">
+
+    <div class="sec-label"><i class="fa-solid fa-book-open" style="font-size:11px"></i> Metodologi</div>
+    <h1 class="page-title">Metodologi Fuzzy-AHP</h1>
+    <p class="subtitle">Penjelasan alur kerja sistem rekomendasi saham menggunakan Fuzzy Analytical Hierarchy Process.</p>
+
+    <!-- PROSES STEPS -->
+    <div class="method-steps">
+        <div class="method-step">
+            <div class="method-step-num">1</div>
+            <div class="method-step-body">
+                <h3>Input Perbandingan Berpasangan</h3>
+                <p>User membandingkan 6 pasangan dari 4 kriteria (Return, Risiko, Dividend, Stabilitas)
+                   menggunakan skala Saaty 1–9. Tiga perbandingan langsung dilakukan terlebih dahulu,
+                   lalu tiga perbandingan turunan dihitung otomatis untuk menjaga konsistensi.</p>
+            </div>
+        </div>
+        <div class="method-step">
+            <div class="method-step-num">2</div>
+            <div class="method-step-body">
+                <h3>Konversi ke Triangular Fuzzy Number (TFN)</h3>
+                <p>Setiap nilai Saaty dikonversi ke TFN (l, m, u) menggunakan tabel konversi standar.
+                   TFN merepresentasikan ketidakpastian penilaian manusia dalam bentuk bilangan fuzzy.</p>
+            </div>
+        </div>
+        <div class="method-step">
+            <div class="method-step-num">3</div>
+            <div class="method-step-body">
+                <h3>Hitung Bobot Fuzzy (Geometric Mean + BNP)</h3>
+                <p>Bobot tiap kriteria dihitung via <em>geometric mean</em> setiap baris matriks TFN,
+                   lalu dinormalisasi. Defuzzifikasi ke nilai crisp menggunakan metode
+                   <strong>BNP</strong>: <code>(l + m + u) / 3</code>.</p>
+            </div>
+        </div>
+        <div class="method-step">
+            <div class="method-step-num">4</div>
+            <div class="method-step-body">
+                <h3>Cek Konsistensi &amp; Ranking Saham</h3>
+                <p>Consistency Ratio (CR) dihitung. Jika CR ≤ 0,10 maka perbandingan diterima.
+                   Setiap saham dinilai dengan <em>weighted sum</em>: Return &amp; Dividend
+                   sebagai <strong>benefit</strong>, Risiko sebagai <strong>cost</strong>
+                   (dibalik: <code>1 − risiko</code>).</p>
+            </div>
+        </div>
+    </div>
+
+    <details class="method-detail">
+        <summary>
+            <span><i class="fa-solid fa-calculator"></i> Lihat detail rumus dan tabel TFN</span>
+            <i class="fa-solid fa-chevron-down"></i>
+        </summary>
+
+        <!-- TABEL KONVERSI SAATY -->
+        <div class="sec-label" style="margin-top:24px">
+            <i class="fa-solid fa-table" style="font-size:11px"></i> Tabel Konversi Skala Saaty → TFN
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Skala Saaty</th>
+                        <th>Definisi</th>
+                        <th>TFN (l, m, u)</th>
+                        <th>TFN Resiprokal (1/u, 1/m, 1/l)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>1</strong></td><td>Sama penting</td><td>(1, 1, 1)</td><td>(1.000, 1.000, 1.000)</td></tr>
+                    <tr><td><strong>3</strong></td><td>Sedikit lebih penting</td><td>(2, 3, 4)</td><td>(0.250, 0.333, 0.500)</td></tr>
+                    <tr><td><strong>5</strong></td><td>Lebih penting</td><td>(4, 5, 6)</td><td>(0.167, 0.200, 0.250)</td></tr>
+                    <tr><td><strong>7</strong></td><td>Sangat lebih penting</td><td>(6, 7, 8)</td><td>(0.125, 0.143, 0.167)</td></tr>
+                    <tr><td><strong>9</strong></td><td>Mutlak lebih penting</td><td>(8, 9, 9)</td><td>(0.111, 0.111, 0.125)</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- FORMULA BOX -->
+        <div class="formula-grid">
+            <div class="formula-card">
+                <div class="formula-label">Geometric Mean Baris i</div>
+                <div class="formula-body">
+                    <span class="formula-math">r̃<sub>i</sub> = ( ã<sub>i1</sub> ⊗ … ⊗ ã<sub>in</sub> )<sup>1/n</sup></span>
+                </div>
+            </div>
+            <div class="formula-card">
+                <div class="formula-label">Defuzzifikasi BNP</div>
+                <div class="formula-body">
+                    <span class="formula-math">BNP<sub>i</sub> = (l<sub>i</sub> + m<sub>i</sub> + u<sub>i</sub>) / 3</span>
+                </div>
+            </div>
+            <div class="formula-card">
+                <div class="formula-label">Consistency Ratio</div>
+                <div class="formula-body">
+                    <span class="formula-math">CR = CI / RI &nbsp;≤&nbsp; 0.10</span>
+                    <span style="font-size:12px;color:#64748b;display:block;margin-top:4px">RI = 0.90 untuk n = 4</span>
+                </div>
+            </div>
+            <div class="formula-card">
+                <div class="formula-label">Skor Ranking Saham</div>
+                <div class="formula-body">
+                    <span class="formula-math">S = w<sub>r</sub>·R + w<sub>ri</sub>·(1−Ri) + w<sub>d</sub>·D + w<sub>s</sub>·St</span>
+                </div>
+            </div>
+        </div>
+    </details>
+
+</section>
+
+<hr class="section-divider">
+
+<!-- ======================================================
+     SECTION 5 : PERBANDINGAN AHP
+====================================================== -->
+<section class="container" id="sec-ahp">
+
+    <div class="sec-label"><i class="fa-solid fa-sliders" style="font-size:11px"></i> Perbandingan Fuzzy-AHP</div>
+    <h1 class="page-title">Perbandingan Kriteria Fuzzy-AHP</h1>
+    <p class="subtitle">Input perbandingan berpasangan menggunakan skala Saaty 1–9 untuk perhitungan Fuzzy-AHP.</p>
+
+    <div class="info-banner">
+        <div class="info-banner-icon"><i class="fa-solid fa-circle-info"></i></div>
+        <div class="info-banner-text">
+            <strong>Cara pakai:</strong>
+            Geser slider untuk membandingkan tiap pasangan kriteria.
+            Nilai tengah (5) = sama penting. Sistem akan menghitung <strong>Fuzzy-AHP</strong>
+            menggunakan Triangular Fuzzy Number dan defuzzifikasi BNP.
+            Jika bingung, mulai dari nilai tengah lalu geser sedikit ke kriteria yang menurut Anda lebih penting.
+        </div>
+    </div>
+
+    <!-- ── RIWAYAT ANALISIS ── -->
+    {% if history %}
+    <div class="riwayat-section">
+        <div class="riwayat-header-row">
+            <div>
+                <div class="sec-label" style="margin-bottom:6px">
+                    <i class="fa-solid fa-clock-rotate-left" style="font-size:11px"></i>
+                    Riwayat Analisis
+                </div>
+                <h2 class="section-title" style="margin:0">{{ history|length }} Analisis Tersimpan</h2>
+            </div>
+            <a href="{{ url_for('hapus_semua_riwayat') }}"
+               onclick="return confirm('Hapus semua riwayat? Tindakan ini tidak bisa dibatalkan.')"
+               class="btn-hapus-all">
+                <i class="fa-solid fa-trash"></i> Hapus Semua
+            </a>
+        </div>
+
+        <div class="riwayat-grid">
+            {% for entry in history %}
+            <div class="riwayat-card">
+                <div class="riwayat-card-top">
+                    <span class="riwayat-time">
+                        <i class="fa-regular fa-clock"></i> {{ entry.timestamp }}
+                    </span>
+                    <span class="riwayat-badge {{ 'ok' if entry.summary.consistent else 'err' }}">
+                        {% if entry.summary.consistent %}
+                            <i class="fa-solid fa-circle-check"></i> Konsisten
+                        {% else %}
+                            <i class="fa-solid fa-circle-xmark"></i> Tidak Konsisten
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div class="riwayat-main">
+                    <div class="riwayat-kode">{{ entry.summary.top_saham }}</div>
+                    <div class="riwayat-detail">
+                        <span>CR = <strong>{{ "%.4f"|format(entry.summary.cr) }}</strong></span>
+                        <span>Skor <strong>{{ "%.4f"|format(entry.summary.top_skor) }}</strong></span>
+                    </div>
+                </div>
+
+                <div class="riwayat-input-row">
+                    <span class="riwayat-input-label">Input:</span>
+                    {% for v in entry.summary.input_values %}
+                    <span class="input-chip">{{ v }}</span>
+                    {% endfor %}
+                </div>
+
+                {% set b = entry.summary.bobot %}
+                <div class="riwayat-bobot-row">
+                    <span class="bobot-chip return">R {{ (b['return'] * 100)|round(1) }}%</span>
+                    <span class="bobot-chip risiko">Ri {{ (b['risiko'] * 100)|round(1) }}%</span>
+                    <span class="bobot-chip dividend">D {{ (b['dividend'] * 100)|round(1) }}%</span>
+                    <span class="bobot-chip stabilitas">S {{ (b['stabilitas'] * 100)|round(1) }}%</span>
+                </div>
+
+                <div class="riwayat-footer">
+                    <a href="{{ url_for('lihat_riwayat', entry_id=entry.id) }}" class="btn-lihat-riwayat">
+                        <i class="fa-solid fa-eye"></i> Lihat Hasil
+                    </a>
+                    <a href="{{ url_for('hapus_riwayat', entry_id=entry.id) }}"
+                       onclick="return confirm('Hapus riwayat ini?')"
+                       class="btn-hapus-riwayat" title="Hapus">
+                        <i class="fa-solid fa-trash"></i>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="riwayat-divider"><span>atau buat analisis baru di bawah</span></div>
+    {% endif %}
+
+    <div class="ahp-card">
+
+        <!-- STEP DOTS -->
+        <div class="ahp-step-dots" id="ahpStepDots"></div>
+
+        <p class="step-text">Langkah <span id="stepNow">1</span> dari 6</p>
+
+        <div class="progress-bar">
+            <div class="progress-fill-ahp fuzzy-mode" id="progressFill"></div>
+        </div>
+
+        <h1 id="questionTitle">Return vs Risiko</h1>
+        <p class="question-subtitle">Mana yang lebih penting dalam memilih saham?</p>
+
+        <div class="input-focus-card">
+            <div>
+                <span class="input-focus-label">Yang perlu Anda lakukan</span>
+                <strong>Pilih kriteria yang lebih penting untuk keputusan investasi.</strong>
+            </div>
+            <p>Geser ke kiri jika kriteria kiri lebih penting, ke kanan jika kriteria kanan lebih penting, atau biarkan di tengah jika sama penting.</p>
+        </div>
+
+        <div class="ahp-versus">
+            <span class="ahp-versus-label" id="leftLabel">Risiko</span>
+            <div class="ahp-versus-vs">VS</div>
+            <span class="ahp-versus-label" id="rightLabel">Return</span>
+        </div>
+
+        <input type="range" min="1" max="9" step="1" value="5" id="ahpSlider" class="fuzzy-slider">
+
+        <div class="ahp-scale-nums">
+            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+            <span>6</span><span>7</span><span>8</span><span>9</span>
+        </div>
+
+        <div class="slider-scale">
+            <span>Kiri lebih penting</span>
+            <span>Sama penting</span>
+            <span>Kanan lebih penting</span>
+        </div>
+
+        <div class="preview-choice fuzzy-mode" id="previewText">
+            <span class="preview-label">Pilihan Anda</span>
+            <span class="highlight" id="previewVal">Kedua kriteria sama penting</span>
+            <span class="preview-strength" id="decisionStrength">Netral</span>
+        </div>
+
+        <details class="technical-input-detail">
+            <summary>
+                <span><i class="fa-solid fa-circle-nodes"></i> Detail teknis Fuzzy-AHP</span>
+                <i class="fa-solid fa-chevron-down"></i>
+            </summary>
+            <p>
+                Angka TFN dipakai sistem untuk menangkap ketidakpastian penilaian.
+                Pengguna pemula cukup fokus pada pilihan di atas.
+            </p>
+            <div class="tfn-preview" id="tfnPreview">
+                <div class="tfn-item">
+                    <div class="tfn-label">Batas rendah (l)</div>
+                    <div class="tfn-val" id="tfnL">1.0</div>
+                </div>
+                <div class="tfn-item">
+                    <div class="tfn-label">Nilai tengah (m)</div>
+                    <div class="tfn-val" id="tfnM">1.0</div>
+                </div>
+                <div class="tfn-item">
+                    <div class="tfn-label">Batas tinggi (u)</div>
+                    <div class="tfn-val" id="tfnU">1.0</div>
+                </div>
+            </div>
+        </details>
+
+        <!-- HINT KONSISTENSI (muncul di langkah 4-6 saja) -->
+        <div class="consistency-hint" id="consistencyHint" style="display:none"></div>
+
+        <div class="button-group">
+            <button class="secondary-btn" id="prevBtn">
+                <i class="fa-solid fa-arrow-left"></i> Sebelumnya
+            </button>
+            <button class="primary-btn" id="nextBtn">
+                Simpan &amp; Lanjut <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Ringkasan input (tampil setelah langkah terakhir diisi) -->
+    <div class="input-summary" id="inputSummary" style="display:none;margin-top:24px">
+        <h2 class="section-title">Ringkasan Perbandingan</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pasangan</th><th>Skala Saaty</th>
+                        <th>TFN (l, m, u)</th><th>Interpretasi</th>
+                    </tr>
+                </thead>
+                <tbody id="summaryBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+</section>
+
+<hr class="section-divider">
+
+<!-- ======================================================
+     SECTION 5 : HASIL
+====================================================== -->
+<section class="container" id="sec-hasil">
+
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:4px">
+        <div>
+            <div class="sec-label"><i class="fa-solid fa-trophy" style="font-size:11px"></i> Hasil Ranking</div>
+            <h1 class="page-title" style="margin-bottom:6px">Hasil Ranking Saham</h1>
+            <p class="subtitle" style="margin:0">Rekomendasi saham Consumer Goods berdasarkan Fuzzy-AHP.</p>
+        </div>
+        {% if ahp %}
+        <button class="print-action" onclick="window.print()"
+            style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;
+                   background:#f1f5f9;border:1px solid #e2e8f0;border-radius:10px;
+                   font-size:13px;font-weight:600;color:#374151;cursor:pointer;
+                   transition:background .2s;align-self:flex-end"
+            onmouseover="this.style.background='#e2e8f0'"
+            onmouseout="this.style.background='#f1f5f9'">
+            <i class="fa-solid fa-print"></i> Cetak / Export
+        </button>
+        {% endif %}
+    </div>
+
+    {% if ahp %}
+    <div class="print-report-title">
+        <h1>Laporan Hasil Rekomendasi Saham</h1>
+        <p>InvestRank - Fuzzy-AHP{% if comparison and comparison.timestamp %} | {{ comparison.timestamp }}{% endif %}</p>
+    </div>
+
+    <!-- METHOD BADGE -->
+    <div class="method-badge fuzzy">
+        <i class="fa-solid fa-circle-nodes"></i>
+        Metode: Fuzzy-AHP (TFN + BNP)
+        {% if comparison and comparison.timestamp %}
+        &nbsp;&middot;&nbsp;
+        <i class="fa-regular fa-clock" style="font-size:11px"></i>
+        {{ comparison.timestamp }}
+        {% endif %}
+    </div>
+
+    {% if ranking %}
+    {% set top = ranking[0] %}
+    <div class="result-hero {{ 'is-consistent' if ahp.consistent else 'is-warning' }}">
+        <div class="result-hero-main">
+            <div class="result-kicker">
+                <i class="fa-solid {{ 'fa-circle-check' if ahp.consistent else 'fa-triangle-exclamation' }}"></i>
+                {{ 'Rekomendasi Konsisten' if ahp.consistent else 'Perlu Ulang Input' }}
+            </div>
+            <h2>{{ top.kode }}</h2>
+            <p>
+                Saham <strong>{{ top.kode }}</strong> menjadi pilihan utama karena memiliki skor total tertinggi.
+                Skor mendekati 1 berarti alternatif semakin sesuai dengan preferensi kriteria yang Anda masukkan.
+            </p>
+            <div class="result-hero-actions">
+                <span class="result-status {{ 'success' if ahp.consistent else 'warning' }}">
+                    {{ 'Input konsisten' if ahp.consistent else 'Input belum konsisten' }}
+                </span>
+                <span>{{ ranking|length }} saham dibandingkan</span>
+                <span>CR {{ "%.4f"|format(ahp.cr) }}</span>
+            </div>
+        </div>
+        <div class="result-score-panel">
+            <span>Skor Akhir</span>
+            <strong>{{ "%.4f"|format(top.skor) }}</strong>
+            {% if top.skor >= 0.75 %}
+                <em>Sangat direkomendasikan</em>
+            {% elif top.skor >= 0.60 %}
+                <em>Layak dipertimbangkan</em>
+            {% else %}
+                <em>Stabil</em>
+            {% endif %}
+        </div>
+        <div class="result-weight-strip">
+            <div><span>Return</span><strong>{{ "%.1f"|format(ahp.bobot.return * 100) }}%</strong></div>
+            <div><span>Risiko</span><strong>{{ "%.1f"|format(ahp.bobot.risiko * 100) }}%</strong></div>
+            <div><span>Dividend</span><strong>{{ "%.1f"|format(ahp.bobot.dividend * 100) }}%</strong></div>
+            <div><span>Stabilitas</span><strong>{{ "%.1f"|format(ahp.bobot.stabilitas * 100) }}%</strong></div>
+        </div>
+    </div>
+
+    <div class="result-insight compact">
+        <div class="result-insight-icon"><i class="fa-solid fa-lightbulb"></i></div>
+        <div>
+            <h2>Catatan Pembacaan</h2>
+            <p>
+                Gunakan ranking sebagai rekomendasi berbasis kriteria, bukan keputusan tunggal.
+                {% if ahp.consistent %}
+                    Nilai CR sudah di bawah 0.10, sehingga perbandingan Anda cukup konsisten.
+                {% else %}
+                    Nilai CR masih di atas 0.10, jadi hasil sebaiknya diperbaiki dengan mengulang input.
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="result-detail-panel">
+        <div>
+            <div class="sec-label"><i class="fa-solid fa-chart-simple" style="font-size:11px"></i> Ringkasan Teknis</div>
+            <!-- SUMMARY -->
+            <div class="summary-card compact">
+                <div class="summary-item">
+                    <h3>{{ ranking|length }}</h3>
+                    <span>Total Saham</span>
+                </div>
+                <div class="summary-item">
+                    <h3>4</h3>
+                    <span>Kriteria</span>
+                </div>
+                <div class="summary-item">
+                    <h3>{{ ranking[0].kode if ranking else '-' }}</h3>
+                    <span>Ranking Terbaik</span>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <!-- BOBOT -->
+            <div class="sec-label"><i class="fa-solid fa-weight-scale" style="font-size:11px"></i> Bobot Kriteria</div>
+            <div class="bobot-grid compact">
+                <div class="bobot-item"><h3>{{ "%.4f"|format(ahp.bobot.return) }}</h3><span>Return</span></div>
+                <div class="bobot-item"><h3>{{ "%.4f"|format(ahp.bobot.risiko) }}</h3><span>Risiko</span></div>
+                <div class="bobot-item"><h3>{{ "%.4f"|format(ahp.bobot.dividend) }}</h3><span>Dividend</span></div>
+                <div class="bobot-item"><h3>{{ "%.4f"|format(ahp.bobot.stabilitas) }}</h3><span>Stabilitas</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CI CR -->
+    <div class="sec-label"><i class="fa-solid fa-circle-check" style="font-size:11px"></i> Konsistensi</div>
+    <div class="summary-card">
+        <div class="summary-item"><h3>{{ "%.4f"|format(ahp.ci) }}</h3><span>Consistency Index (CI)</span></div>
+        <div class="summary-item"><h3>{{ "%.4f"|format(ahp.cr) }}</h3><span>Consistency Ratio (CR)</span></div>
+        <div class="summary-item">
+            {% if ahp.consistent %}
+                <h3 style="color:#16a34a">Konsisten</h3>
+            {% else %}
+                <h3 style="color:#ef4444">Tidak Konsisten</h3>
+            {% endif %}
+            <span>Status (CR &lt; 0.10)</span>
+        </div>
+    </div>
+
+    {% if not ahp.consistent %}
+    <div class="summary-card" style="border:2px solid #ef4444;margin-bottom:24px">
+        <div class="summary-item" style="grid-column:1/-1">
+            <h3 style="color:#ef4444">Peringatan</h3>
+            <span>CR &gt; 0.10 — input perbandingan belum konsisten. Coba ulangi dengan nilai yang tidak terlalu bertentangan antar kriteria.</span>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- FUZZY TFN TABLE -->
+    {% if ahp.bobot_tfn %}
+    <div class="sec-label"><i class="fa-solid fa-circle-nodes" style="font-size:11px"></i> Bobot Fuzzy TFN per Kriteria</div>
+    <div class="tfn-table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Kriteria</th>
+                    <th>l (lower)</th>
+                    <th>m (middle)</th>
+                    <th>u (upper)</th>
+                    <th>Bobot BNP</th>
+                </tr>
+            </thead>
+            <tbody id="tfnTableBody">
+                <!-- Diisi oleh hasil.js -->
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <!-- MATRIKS 4x4 -->
+    {% if ahp.matrix %}
+    <div class="sec-label" style="margin-top:8px">
+        <i class="fa-solid fa-border-all" style="font-size:11px"></i> Matriks Perbandingan TFN (4×4)
+    </div>
+    <div class="table-container" style="margin-bottom:8px">
+        <table class="matrix-table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Return</th><th>Risiko</th><th>Dividend</th><th>Stabilitas</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set klabel = ['Return','Risiko','Dividend','Stabilitas'] %}
+                {% for i in range(4) %}
+                <tr>
+                    <td><strong>{{ klabel[i] }}</strong></td>
+                    {% for j in range(4) %}
+                        {% set cell = ahp.matrix[i][j] %}
+                        <td class="{{ 'matrix-diag' if i == j else '' }}">
+                            {% if i == j %}
+                                (1, 1, 1)
+                            {% else %}
+                                ({{ cell.l }}, {{ cell.m }}, {{ cell.u }})
+                            {% endif %}
+                        </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <!-- RESET -->
+    <div class="reset-action" style="margin:8px 0 28px">
+        <a href="{{ url_for('reset_ahp') }}"
+           class="reset-link"
+           onclick="return confirm('Yakin ingin reset data Fuzzy-AHP?')"
+           style="display:inline-flex">
+            <i class="fa-solid fa-rotate-left"></i> Reset Fuzzy-AHP
+        </a>
+    </div>
+
+    <!-- TOP 3 -->
+    <div class="sec-label"><i class="fa-solid fa-medal" style="font-size:11px"></i> Top Ranking Saham</div>
+    <div class="ranking-card">
+        {% for s in ranking[:3] %}
+        <div class="stock-card {% if loop.index == 1 %}top{% endif %}">
+            <div class="rank">
+                {% if loop.index == 1 %}🥇{% elif loop.index == 2 %}🥈{% else %}🥉{% endif %}
+            </div>
+            <h3>{{ s.kode }}</h3>
+            {% if s.skor >= 0.75 %}
+                <span class="badge green">Sangat Direkomendasikan</span>
+            {% elif s.skor >= 0.60 %}
+                <span class="badge yellow">Layak Dipertimbangkan</span>
+            {% else %}
+                <span class="badge blue">Stabil</span>
+            {% endif %}
+            <div class="score">{{ "%.4f"|format(s.skor) }}</div>
+            <div class="progress">
+                <div class="fill" style="width:{{ (s.skor * 100)|round(1) }}%"></div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- DETAIL TABLE -->
+    <div class="sec-label"><i class="fa-solid fa-list-ol" style="font-size:11px"></i> Detail Ranking</div>
+    <div class="table-container" style="margin-bottom:28px">
+        <table>
+            <thead>
+                <tr><th>Ranking</th><th>Saham</th><th>Skor</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+                {% for s in ranking %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td><strong>{{ s.kode }}</strong></td>
+                    <td>{{ "%.4f"|format(s.skor) }}</td>
+                    <td>
+                        {% if s.skor >= 0.75 %}
+                            <span class="badge green">Direkomendasikan</span>
+                        {% elif s.skor >= 0.60 %}
+                            <span class="badge yellow">Dipertimbangkan</span>
+                        {% else %}
+                            <span class="badge blue">Stabil</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- CHART SKOR -->
+    <div class="sec-label"><i class="fa-solid fa-chart-bar" style="font-size:11px"></i> Grafik Skor Fuzzy-AHP</div>
+    <div class="chart-card">
+        <div class="chart-canvas-wrapper chart-sm">
+            <canvas id="rankFuzzyChart"></canvas>
+        </div>
+    </div>
+
+    <!-- DONUT BOBOT -->
+    <div class="sec-label" style="margin-top:28px"><i class="fa-solid fa-chart-pie" style="font-size:11px"></i> Distribusi Bobot Kriteria</div>
+    <div class="chart-card">
+        <div class="donut-grid">
+            <div class="chart-canvas-wrapper chart-xs">
+                <canvas id="bobotChart"></canvas>
+            </div>
+            <div class="donut-legend" id="donutLegend"></div>
+        </div>
+    </div>
+
+    {% else %}
+
+    <div class="summary-card" style="margin-top:0">
+        <div class="summary-item" style="grid-column:1/-1;padding:40px;text-align:center">
+            <h3 style="font-size:20px;margin-bottom:12px">Belum ada data Fuzzy-AHP</h3>
+            <span>Silakan isi perbandingan kriteria terlebih dahulu.</span>
+            <div style="margin-top:20px">
+                <a href="#sec-ahp" class="hero-btn nav-scroll" style="display:inline-flex">
+                    <i class="fa-solid fa-sliders"></i> Input Fuzzy-AHP Sekarang
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+
+</section>
+
+<!-- SCRIPTS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const hasilURL       = "{{ url_for('dashboard') }}";
+    const rankingData    = {{ (ranking | tojson) if ranking else "[]" }};
+    const ahpData        = {{ (ahp | tojson) if ahp else "null" }};
+    const comparisonData = {{ (comparison | tojson) if comparison else "null" }};
+</script>
+
+<script src="{{ url_for('static', filename='assets/js/dashboard.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/saham.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/fuzzy_ahp.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/hasil.js') }}"></script>
+
+<!-- Hamburger nav toggle -->
+<script>
+(function () {
+    var btn   = document.getElementById('navHamburger');
+    var links = document.getElementById('navLinks');
+    var icon  = document.getElementById('hamburgerIcon');
+    if (!btn) return;
+
+    btn.addEventListener('click', function () {
+        var open = links.classList.toggle('open');
+        icon.className = open ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+    });
+
+    links.querySelectorAll('a').forEach(function (a) {
+        a.addEventListener('click', function () {
+            links.classList.remove('open');
+            icon.className = 'fa-solid fa-bars';
+        });
+    });
+})();
+</script>
+
+<!-- Ringkasan input AHP -->
+<script>
+(function () {
+    var SAATY_TFN = {
+        1:[1,1,1],2:[1,2,3],3:[2,3,4],4:[3,4,5],
+        5:[4,5,6],6:[5,6,7],7:[6,7,8],8:[7,8,9],9:[8,9,9]
+    };
+    var PAIRS = [
+        ['Return','Risiko'],['Risiko','Dividend'],['Dividend','Stabilitas'],
+        ['Return','Dividend'],['Return','Stabilitas'],['Risiko','Stabilitas']
+    ];
+    function sliderToSaaty(v) { return v === 5 ? 1 : 1 + 2 * Math.abs(v - 5); }
+    function interpretasi(v, pair) {
+        if (v === 5) return 'Sama penting';
+        var t = sliderToSaaty(v);
+        var d = v > 5 ? pair[0] : pair[1];
+        var lbl = t <= 3 ? 'Sedikit lebih penting' : t <= 5 ? 'Lebih penting' : t <= 7 ? 'Jauh lebih penting' : 'Mutlak lebih penting';
+        return '<strong>' + d + '</strong> ' + lbl + ' (' + t + '&times;)';
+    }
+    window._updateSummary = function (vals) {
+        var body = document.getElementById('summaryBody');
+        if (!body) return;
+        body.innerHTML = '';
+        vals.forEach(function (v, i) {
+            var s = sliderToSaaty(v);
+            var t = SAATY_TFN[s];
+            body.innerHTML +=
+                '<tr><td><strong>' + PAIRS[i][0] + '</strong> vs ' + PAIRS[i][1] + '</td>'
+                + '<td><strong>' + s + '</strong></td>'
+                + '<td>(' + t[0] + ', ' + t[1] + ', ' + t[2] + ')</td>'
+                + '<td>' + interpretasi(v, PAIRS[i]) + '</td></tr>';
+        });
+        var el = document.getElementById('inputSummary');
+        if (el) el.style.display = 'block';
+    };
+})();
+</script>
+
+<!-- Scroll otomatis ke section yang dituju setelah redirect -->
+{% if scroll_to %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var el = document.getElementById('{{ scroll_to }}');
+    if (el) {
+        setTimeout(function () {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 120);
+    }
+});
+</script>
+{% endif %}
+
+<!-- Active nav link on scroll -->
+<script>
+(function () {
+    var sections = document.querySelectorAll('section[id]');
+    var links    = document.querySelectorAll('.nav-scroll');
+    function onScroll() {
+        var scrollY = window.scrollY + 80;
+        var active  = null;
+        sections.forEach(function (sec) {
+            if (sec.offsetTop <= scrollY) active = sec.id;
+        });
+        links.forEach(function (a) {
+            var href = a.getAttribute('href').replace('#', '');
+            a.classList.toggle('active', href === active);
+        });
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+})();
+</script>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>InvestRank</span>
+        </div>
+        <div class="footer-info">
+            <p><strong>Sistem Rekomendasi Saham Consumer Goods</strong></p>
+            <p>Menggunakan Fuzzy Analytical Hierarchy Process (Fuzzy-AHP)</p>
+        </div>
+        <div class="footer-meta">
+            <p>Mata Kuliah: <strong>Logika Fuzzy (SCR)</strong></p>
+            <p>Program Studi Teknik Informatika</p>
+            <p>Universitas Teknologi Yogyakarta &mdash; 2026</p>
+        </div>
+        <div class="footer-tech">
+            <span class="footer-badge"><i class="fa-brands fa-python"></i> Flask</span>
+            <span class="footer-badge"><i class="fa-solid fa-circle-nodes"></i> Fuzzy-AHP</span>
+            <span class="footer-badge"><i class="fa-solid fa-chart-line"></i> Yahoo Finance</span>
+            <span class="footer-badge"><i class="fa-solid fa-chart-bar"></i> Chart.js</span>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        &copy; 2026 InvestRank &mdash; Proyek Akhir Logika Fuzzy, UTY
+    </div>
+</footer>
+
+</body>
+</html>
