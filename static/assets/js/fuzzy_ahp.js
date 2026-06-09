@@ -82,7 +82,6 @@ document.addEventListener('DOMContentLoaded', function () {
     var elTFNL     = document.getElementById('tfnL');
     var elTFNM     = document.getElementById('tfnM');
     var elTFNU     = document.getElementById('tfnU');
-    var elCrispVal = document.getElementById('crispVal');
     var elStrength = document.getElementById('decisionStrength');
     var elHint     = document.getElementById('consistencyHint');
     var btnNext    = document.getElementById('nextBtn');
@@ -138,7 +137,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (elTFNL) elTFNL.textContent = tfn[0].toFixed(1);
         if (elTFNM) elTFNM.textContent = tfn[1].toFixed(1);
         if (elTFNU) elTFNU.textContent = tfn[2].toFixed(1);
-        if (elCrispVal) elCrispVal.textContent = saaty;
     }
 
     /* ── HINT KONSISTENSI (muncul di step 3-5) ── */
@@ -166,7 +164,7 @@ document.addEventListener('DOMContentLoaded', function () {
     /* ── RENDER STEP ── */
     function renderStep(isForward) {
         if (elStep)   elStep.textContent  = step + 1;
-        if (elTitle)  elTitle.textContent = pairs[step][0] + ' vs ' + pairs[step][1];
+        if (elTitle)  elTitle.textContent = pairs[step][1] + ' vs ' + pairs[step][0];
         if (elLeft)   elLeft.textContent  = pairs[step][1];
         if (elRight)  elRight.textContent = pairs[step][0];
 
@@ -221,7 +219,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (btnPrev) {
         btnPrev.addEventListener('click', function () {
-            if (step > 0) { step--; renderStep(false); }
+            if (step > 0) {
+                step--;
+                if (step < 3) {
+                    userOverride[3] = userOverride[4] = userOverride[5] = false;
+                }
+                renderStep(false);
+            }
         });
     }
 

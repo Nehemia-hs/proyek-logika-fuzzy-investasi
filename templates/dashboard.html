@@ -577,7 +577,7 @@ Single-page layout — semua section scroll
             <div class="progress-fill-ahp fuzzy-mode" id="progressFill"></div>
         </div>
 
-        <h1 id="questionTitle">Return vs Risiko</h1>
+        <h1 id="questionTitle">Risiko vs Return</h1>
         <p class="question-subtitle">Mana yang lebih penting dalam memilih saham?</p>
 
         <div class="input-focus-card">
@@ -673,7 +673,7 @@ Single-page layout — semua section scroll
 <hr class="section-divider">
 
 <!-- ======================================================
-     SECTION 5 : HASIL
+     SECTION 6 : HASIL
 ====================================================== -->
 <section class="container" id="sec-hasil">
 
@@ -984,7 +984,6 @@ Single-page layout — semua section scroll
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-    const hasilURL       = "{{ url_for('dashboard') }}";
     const rankingData    = {{ (ranking | tojson) if ranking else "[]" }};
     const ahpData        = {{ (ahp | tojson) if ahp else "null" }};
     const comparisonData = {{ (comparison | tojson) if comparison else "null" }};
@@ -1044,7 +1043,7 @@ Single-page layout — semua section scroll
             var s = sliderToSaaty(v);
             var t = SAATY_TFN[s];
             body.innerHTML +=
-                '<tr><td><strong>' + PAIRS[i][0] + '</strong> vs ' + PAIRS[i][1] + '</td>'
+                '<tr><td><strong>' + PAIRS[i][1] + '</strong> vs ' + PAIRS[i][0] + '</td>'
                 + '<td><strong>' + s + '</strong></td>'
                 + '<td>(' + t[0] + ', ' + t[1] + ', ' + t[2] + ')</td>'
                 + '<td>' + interpretasi(v, PAIRS[i]) + '</td></tr>';

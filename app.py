@@ -11,7 +11,7 @@ from flask import (
     redirect, url_for, session, jsonify
 )
 
-from fuzzy   import calculate_fuzzy_ahp
+from fuzzy_ahp   import calculate_fuzzy_ahp
 from models  import get_all_saham, ranking_saham, get_cache_info, _realtime_cache
 from history import (
     load_history, save_history_entry,
