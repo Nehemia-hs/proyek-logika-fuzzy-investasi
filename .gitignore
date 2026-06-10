@@ -3,3 +3,7 @@ __pycache__/
 *.pyc
 .vscode/
 .DS_Store
+~$APORAN.docx
+.LAPORAN.docx
+.LAPORAN.md
+.md_to_docx.py
